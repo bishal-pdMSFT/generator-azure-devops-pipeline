@@ -1,0 +1,337 @@
+{
+  "manifestVersion": 1.0,
+  "extensionId": "<%= extProps.extensionId %>",
+  "name": "Pipeline templates extension for continuous delivery",
+  "publisher": "ms",
+  "version": "0.1.0",
+  "description": "Pipeline template contributions for creating CI/CD pipelines",
+  "categories": ["Integrate"],
+  "galleryFlags": ["System", "BuiltIn", "MultiVersion"],
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "files": [
+    {
+      "path": "Files",
+      "addressable": true
+    }
+  ],
+  "eventCallbacks": {
+    "versionCheck": {
+      "uri":
+        "{{DeploymentUrl \"0000003B-0000-8888-8000-000000000000\"}}_apis/public/extensions/vdisc"
+    }
+  },
+  "contributions": [
+    {
+      "id": "aspnet-windowswebapp",
+      "type": "ms.vss-continuous-delivery.pipeline-template-type",
+      "targets": ["ms.vss-continuous-delivery.pipeline-templates"],
+      "properties": {
+        "description":
+          "i18n:Template for configuring CI/CD pipeline for ASP.Net app on Azure windows app service",
+        "attributes": {
+          "codeRepositoryType": "Sample",
+          "runtimeId":
+            "ms.vss-continuous-delivery-pipeline-templates.runtime-type-dotnet",
+          "frameworkId":
+            "ms.vss-continuous-delivery-pipeline-templates.framework-type-aspnet",
+          "serviceId":
+            "ms.vss-continuous-delivery-pipeline-templates.service-type-appservice-windows"
+        },
+        "parameters": {
+          "groups": [
+            {
+              "id": "azure",
+              "name": "Azure",
+              "properties": {
+                "context": "service"
+              }
+            },
+            {
+              "id": "webApp",
+              "name": "Web App on Windows",
+              "properties": {
+                "context": "service"
+              }
+            }
+          ],
+          "inputs": [
+            {
+              "id": "subscriptionId",
+              "type": "string",
+              "description":
+                "Id of subscription where web app will be created.",
+              "Name": "i18n:Subscription",
+              "inputMode": "AzureSubscription",
+              "groupId": "azure",
+              "isRequired": true,
+              "properties": {
+                "attributes": "primary;"
+              }
+            },
+            {
+              "id": "resourceGroup",
+              "type": "string",
+              "description":
+                "i18n:Name of resource group which should contain web app.",
+              "Name": "i18n:Resource group",
+              "inputMode": "TextBox",
+              "groupId": "azure",
+              "isRequired": true,
+              "defaultValue": "resourcegroup1",
+              "staticValidation": {
+                "pattern": "[a-zA-Z]*",
+                "errorMessage":
+                  "i18n:Resource group name should be all alpha-numerics",
+                "minLength": 3,
+                "maxLength": 15
+              }
+            },
+            {
+              "id": "webAppName",
+              "type": "string",
+              "description": "i18n:Name of web app to be created",
+              "Name": "i18n:Web app name",
+              "inputMode": "TextBox",
+              "groupId": "webApp",
+              "isRequired": true,
+              "defaultValue": "webapp1",
+              "properties": {
+                "attributes": "primary;"
+              },
+              "staticValidation": {
+                "pattern": "[a-zA-Z]*",
+                "errorMessage":
+                  "i18n:Web app name should be all alpha-numerics",
+                "minLength": 3,
+                "maxLength": 15
+              },
+              "dynamicValidations": [
+                {
+                  "dataSourceId": "checkWebAppAvailability",
+                  "errorMessage": "i18n:Web app with this name already exists"
+                }
+              ]
+            },
+            {
+              "id": "location",
+              "type": "string",
+              "description": "i18n:Location of the web app.",
+              "name": "i18n:Location",
+              "inputMode": "Combo",
+              "groupId": "webApp",
+              "isRequired": true,
+              "dataSourceId": "webAppLocations",
+              "defaultValue": "South Central US",
+              "properties": {
+                "attributes": "primary;"
+              }
+            },
+            {
+              "id": "appServicePlan",
+              "type": "string",
+              "description":
+                "i18n:Details of cost and compute resource associated with the web app",
+              "name": "i18n:Pricing tier",
+              "inputMode": "Combo",
+              "groupId": "webApp",
+              "isRequired": true,
+              "possibleValues": [
+                {
+                  "value": "P1 Premium",
+                  "displayValue": "P1 Premium (1 Core, 1.75 GB RAM)"
+                },
+                {
+                  "value": "P2 Premium",
+                  "displayValue": "P2 Premium (2 Core, 3.5 GB RAM)"
+                },
+                {
+                  "value": "P3 Premium",
+                  "displayValue": "P3 Premium (4 Core, 7 GB RAM)"
+                },
+                {
+                  "value": "S1 Standard",
+                  "displayValue": "S1 Standard (1 Core, 1.75 GB RAM)"
+                },
+                {
+                  "value": "S2 Standard",
+                  "displayValue": "S2 Standard (2 Core, 3.5 GB RAM)"
+                },
+                {
+                  "value": "S3 Standard",
+                  "displayValue": "S3 Standard (4 Core, 7 GB RAM)"
+                },
+                {
+                  "value": "B1 Basic",
+                  "displayValue": "B1 Basic (1 Core, 1.75 GB RAM)"
+                },
+                {
+                  "value": "B2 Basic",
+                  "displayValue": "B2 Basic (2 Core, 3.5 GB RAM)"
+                },
+                {
+                  "value": "B3 Basic",
+                  "displayValue": "B3 Basic (4 Core, 7 GB RAM)"
+                },
+                {
+                  "value": "F1 Free",
+                  "displayValue": "F1 Free"
+                },
+                {
+                  "value": "D1 Shared",
+                  "displayValue": "D1 Shared"
+                }
+              ],
+              "defaultValue": "S1 Standard",
+              "properties": {
+                "attributes": "summarizable;"
+              }
+            },
+            {
+              "id": "appInsightLocation",
+              "type": "string",
+              "description": "i18n:Application insights location.",
+              "name": "i18n:Application Insights Location",
+              "inputMode": "Combo",
+              "groupId": "webApp",
+              "isRequired": true,
+              "dataSourceId": "appInsightsLocation",
+              "defaultValue": "South Central US"
+            },
+            {
+              "id": "accessToken",
+              "type": "secureString",
+              "description": "i18n:AAD access token for VSTS.",
+              "inputMode": "AadAccessToken"
+            },
+            {
+              "id": "tenantId",
+              "type": "string",
+              "description": "i18n:AAD tenant id.",
+              "inputMode": "TenantId"
+            }
+          ],
+          "dataSources": [
+            {
+              "id": "webAppLocations",
+              "endpointUrlStem":
+                "/subscriptions/{{{inputs.subscriptionId}}}/providers/Microsoft.Web?api-version=2016-09-01",
+              "resultSelector":
+                "$.resourceTypes[?(@.resourceType === 'sites')].locations"
+            },
+            {
+              "id": "appInsightsLocation",
+              "endpointUrlStem":
+                "/subscriptions/{{{inputs.subscriptionId}}}/providers/microsoft.insights?api-version=2016-09-01",
+              "resultSelector":
+                "$.resourceTypes[?(@.resourceType === 'components')].locations"
+            },
+            {
+              "id": "checkWebAppAvailability",
+              "endpointUrlStem":
+                "/{{{inputs.subscriptionId}}}/providers/Microsoft.Web/ishostnameavailable/{{inputs.webAppName}}",
+              "httpMethod": "POST",
+              "requestBody":
+                "\\{\\\"name\\\":\\\"{{{inputs.webAppName}}}\\\"\\}"
+            }
+          ]
+        },
+        "configuration": {
+          "assets": {
+            "ARMResourceGroup": {
+              "type": "endpoint:AzureRM",
+              "inputs": {
+                "scope":
+                  "/subscriptions/{{{inputs.subscriptionId}}}//resourceGroups/{{{inputs.resourceGroup}}}",
+                "subscriptionId": "{{inputs.subscriptionId}}",
+                "tenantId": "{{inputs.tenantId}}",
+                "accessToken": "{{{inputs.accessToken}}}"
+              }
+            }
+          },
+          "source": {
+            "repoFolderPath": "dotnet\\aspnet\\webapp\\application"
+          },
+          "buildDefinition": {
+            "queue": "HostedVS2017",
+            "templateFile": "Files/BuildDefinitionTemplates/AspNetBuild.json",
+            "phaseInputs": [
+              {
+                "taskInputs": [
+                  {
+                    "__TaskId__": "333b11bd-d341-40d9-afcf-b32d5ce6f23b"
+                  },
+                  {
+                    "__TaskId__": "71a9a2d3-a98a-4caa-96ab-affca411ecda"
+                  },
+                  {
+                    "__TaskId__": "ef087383-ee5e-42c7-9a53-ab56c98420f9"
+                  },
+                  {
+                    "__TaskId__": "0675668a-7bba-4ccb-901d-5ad6554ca653"
+                  },
+                  {
+                    "__TaskId__": "5bfb729a-a7c8-4a78-a7c3-8d717bb7c13c",
+                    "SourceFolder": "armtemplates"
+                  },
+                  {
+                    "__TaskId__": "2ff763a7-ce83-4e1f-bc89-0ae63477cebe"
+                  }
+                ]
+              }
+            ]
+          },
+          "releaseDefinition": {
+            "environments": [
+              {
+                "name": "dev",
+                "deployedResourceIds": [
+                  "/subscriptions/{{{inputs.subscriptionId}}}/resourceGroups/{{{inputs.resourceGroup}}}/providers/Microsoft.Web/sites/{{{inputs.webAppName}}}"
+                ],
+                "variables": {
+                  "vmPassword": {
+                    "isSecret": true,
+                    "value": "{{{inputs.vmPassword}}}"
+                  },
+                  "vmUser": {
+                    "value": "{{{inputs.vmUser}}}"
+                  }
+                },
+                "templateFile":
+                  "Files/ReleaseDefinitionTemplates/deployAzureAppService.json",
+                "phaseInputs": [
+                  {
+                    "queue": "HostedVS2017",
+                    "taskInputs": [
+                      {
+                        "__TaskId__": "94a74903-f93f-4075-884f-dc11f34058b4",
+                        "ConnectedServiceName": "{{{assets.ARMResourceGroup}}}",
+                        "ResourceGroupName": "{{{inputs.resourceGroup}}}",
+                        "location": "{{{inputs.location}}}",
+                        "csmFile":
+                          "$(System.DefaultWorkingDirectory)/**/windows-webapp-template.json",
+                        "overrideParameters":
+                          "-webAppName {{{inputs.webAppName}}} -hostingPlanName {{{inputs.webAppName}}}-plan -appInsightsLocation \"{{{inputs.appInsightLocation}}}\" -sku \"{{{inputs.appServicePlan}}}\""
+                      },
+                      {
+                        "__TaskId__": "497d490f-eea7-4f2b-ab94-48d9c1acdcb1",
+                        "ConnectedServiceName": "{{{assets.ARMResourceGroup}}}",
+                        "WebAppName": "{{{inputs.webAppName}}}",
+                        "ResourceGroupName": "{{{inputs.resourceGroup}}}",
+                        "Package":
+                          "$(System.DefaultWorkingDirectory)\\**\\*.zip"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

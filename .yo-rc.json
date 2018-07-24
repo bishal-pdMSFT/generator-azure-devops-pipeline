@@ -1,0 +1,9 @@
+{
+  "generator-node": {
+    "promptValues": {
+      "authorName": "Bishal Prasad",
+      "authorEmail": "biprasad@microsoft.com",
+      "authorUrl": ""
+    }
+  }
+}
